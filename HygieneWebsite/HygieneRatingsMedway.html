@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Medway Restaurant Hygiene Ratings</title>
+  <link rel="icon" href="https://i.imgur.com/whGquNw.png">
+  <style>
+    body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #49176d;
+    color:black;
+    border-radius: 20px;
+  }
+  h1, p {
+    color:black;
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: normal;
+    font-weight: 300;
+    left: 30px;
+  }
+  .buttonArea {
+    background: #49176d;
+    background-color: #49176d;
+    color: #49176d;
+  }
+  .pagin {
+  background-color: #49176d;
+  color: white;
+  padding: 15px 15px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 80%;
+  border: 2px solid white;
+  transition-duration: 0.4s;
+  -webkit-transition-duration: 0.4s; //Safari
+  }
+  .pagin:hover {
+    background-color: white;
+    color: #49176d;
+    border: 2px solid #49176d;
+  }
+  .movement {
+  background-color: #49176d;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 80%;
+  border: 2px solid white;
+  border-left: 12px solid white;
+  border-right: 12px solid white;
+  transition-duration: 0.4s;
+  -webkit-transition-duration: 0.4s; //Safari
+  }
+  .movement:hover {
+    background-color: white;
+    color: #49176d;
+    border: 2px solid #49176d;
+  }
+  .search {
+    background-color: #49176d;
+    border: 2px solid white;
+    color: white;
+    padding: 15px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 80%;
+  }
+  .search:hover {
+    background-color: #49176d;
+    border: 2px solid white;
+    color: white;
+    padding: 15px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 80%;
+    }
+  }
+  #current {
+    background-color: white;
+    color: #49176d;
+    border: 3px solid #49176d;
+    font-size: 100%;
+  }
+  table, tr {
+    color: #007c75;
+    padding: 0px;
+    border: 2px solid black;
+  }
+  tr:nth-child(even) {
+    background-color: lightgrey;
+  }
+  .entryRow:hover {
+    background-color: #007c75;
+  }
+  td {
+    color: black;
+  }
+  .rating {
+    background-color: #49176d;
+    border: none;
+    color: white;
+    padding: 1px 3px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 80%;
+    transition-duration: 0.2s;
+    -webkit-transition-duration: 0.2s; //Safari
+  }
+  .rating:hover {
+    background-color: white;
+    color: #49176d;
+    border: 2px solid #49176d;
+  }
+  .mainDiv {
+    background-color: white;
+    padding: 10px 30px;
+  }
+  .searchButton {
+    background-color: #007c75;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    padding: 1px 3px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 80%;
+    transition-duration: 0.2s;
+    -webkit-transition-duration: 0.2s; //Safari
+  }
+  .searchButton:hover {
+    background-color: white;
+    color: #007c75;
+    border: 2px solid #007c75;
+    border-radius: 4px;
+  }
+  .searchBox {
+    border-radius: 6px;
+    border: 2px solid #007c75;
+    padding: 0px 30px;
+    background-color: white;
+  }
+  .ui-autocomplete {
+	  position: absolute;
+    top: 0;
+	  left: 0;
+    cursor: default;
+    background-color: white;
+    border: 2px solid #007c75;
+    border-radius: 4px;
+  }
+  .ui-menu {
+    background-color: white;
+    border: 2px solid #007c75;
+    border-radius: 4px;
+  }
+  .ui-state-focus, .ui-state-hover, .ui-state-active {
+    color: white;
+    text-decoration: none;
+    background-color: #007c75;
+    border-radius: 0px;
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+  }
+  .ui-corner-al l{
+    background-color: white;
+    border: 2px solid #007c75;
+    border-radius: 4px;
+  }
+  .searchForm {
+    padding: 10px 20px;
+  }
+  .finePrint {
+    padding: 10px 20px;
+    font-size: 10px;
+  }
+  </style>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+  <script>
+    var pages;
+    var pageNum = 0;
+
+    $(document).ready(function() {
+
+          //All Functions
+          //setPage Function
+          function setPage(p) {
+            pageNum = p;
+            setSearch();
+            createButtons();
+            $.getJSON("https://www.cs.kent.ac.uk/people/staff/sm951/co539/assessment2/hygiene.php?operation=get&page=" + p, function(data) {
+              $(".entryRow").remove();
+              $.each(data, function(i, item) {
+                $("table").append('<tr class="entryRow">' +
+                  '<td>' + item.name + '</td>' +
+                  '<td>' + item.addressLine + '</td>' +
+                  '<td>' + item.hygieneRating + '</td>' +
+                  '<td>' + item.ratingDate + '</td>' +
+                  '<td>' + '<button class="rating" value="' + item.name + '">Get Rating</button>' + '</td>' +
+                  '</tr>');
+              });
+              setRatingView();
+            });
+          }
+
+          //createButtons Function
+          function createButtons() {
+            $(".pagin").remove();
+            $(".movement").remove();
+            $(".search").remove();
+            $("#m").html(pageNum);
+
+            //Previous Page Button
+            $("#buttonArea").append('<button class="movement" id="prev"><</button>');
+            setPrevious();
+
+            //FirstButton
+            if (pageNum - 6 > 0) {
+              $("#buttonArea").append('<button class="pagin" id="first" value="1">1</button>');
+              setFirst();
+              if (pageNum != (7)) {
+                $("#buttonArea").append('<button class="search" id="search">...</button>');
+              }
+            }
+
+
+            //BeforeButtons
+            for (var i = (pageNum - 5); i < (pageNum); i++) {
+              if (i > 0) {
+                $("#buttonArea").append('<button class="pagin" name = "side" value =' + i + '>' + i + '</button>');
+                setSide();
+              }
+            }
+
+            //CurrentButton
+            $("#buttonArea").append('<button class="pagin" id="current" value=' + pageNum + '>' + pageNum + '</button>');
+
+            //AfterButtons
+            for (var i = (parseInt(pageNum) + 1); i < (parseInt(pageNum) + 6); i++) {
+              if (i < pages + 1) {
+                $("#buttonArea").append('<button class="pagin" name="side" value =' + i + '>' + i + '</button>');
+                setSide();
+              }
+            }
+
+            //LastButton
+            if (parseInt(pageNum) + 5 < pages) {
+              if (parseInt(pageNum) != (pages - 6)) {
+                $("#buttonArea").append('<button class="search" name="search">...</button>');
+              }
+              $("#buttonArea").append('<button class="pagin" id="last">' + pages + '</button>');
+              setLast();
+            }
+
+            //Next Page Button
+            $("#buttonArea").append('<button class="movement" id="next">></button>');
+            setNext();
+          }
+
+          //setFirstPage
+          $.get("https://www.cs.kent.ac.uk/people/staff/sm951/co539/assessment2/hygiene.php?operation=pages", function(data) {
+            pages = data.pages;
+            //Starting List Zero
+            $(".entryRow").remove();
+            setPage(1);
+          });
+
+          //Set First Page Button Action
+          function setFirst() {
+            $("#first").click(function() {
+              $(".entryRow").remove();
+              setPage(1);
+            });
+          }
+
+          //Set Middle Buttons Actions
+          function setSide() {
+            $(".pagin").click(function() {
+              $(".entryRow").remove();
+              var input = $(this).val();
+              pageNum = input;
+              setPage(input);
+            });
+          }
+
+          //Set Rating Buttions Actions
+          function setRatingView() {
+            $(".rating").click(function() {
+              var ratingName = $(this).val();
+              getGoogleRating(ratingName);
+            });
+          }
+
+          function getGoogleRating(resName) {
+            $.get("https://www.cs.kent.ac.uk/people/staff/sm951/co539/assessment2/rating.php?name=" + resName, function(data) {
+              if (data[0] != null && data[1] == null) {
+                $.each(data, function(i, item) {
+                  alert('Rated: ' + item.rating + ' by customers on Google');
+                });
+              } else if (data[0] == null) {
+                alert('No ratings found on Google.');
+              } else {
+                alert('More than 2 ratings found.')
+                $.each(data, function(i, item) {
+                  alert('One found at ' + item.vicinity + ' rated ' + item.rating + ' by customers on Google.');
+                });
+              }
+            });
+          }
+
+          //Previous Action
+          function setPrevious() {
+          $("#prev").click(function() {
+            if (pageNum - 1 > 0) {
+              pageNum = parseInt(pageNum) - 1;
+            }
+            $(".entryRow").remove();
+            setPage(pageNum);
+          });
+        }
+
+          //Next Action
+          function setNext() {
+          $("#next").click(function() {
+            if (pageNum < pages) {
+              pageNum = parseInt(pageNum) + 1;
+            }
+            $(".entryRow").remove();
+            setPage(pageNum);
+          });
+        }
+
+          //Autcomplete Default Options
+          var defaultOptions = [
+             "2 Red Cakes",
+             "3 Sixteen (Parkwood) Ltd",
+             "A Taste of India",
+             "A2 Takeaway",
+          ];
+
+          //Set Up Autocomplete
+          $(".searchBox").autocomplete({
+            source: defaultOptions,
+            appendTo: ".results"
+          });
+
+          //Last Page Button Action
+          function setLast() {
+            $("#last").click(function() {
+              pageNum = pages;
+              setPage(pageNum);
+            });
+          }
+
+          function setSearch() {
+            $(".searchButton").click(function() {
+                var input = $(".searchBox").val();
+                //alert("SearchSubmitted: " + input);
+                $.getJSON("https://www.cs.kent.ac.uk/people/staff/sm951/co539/assessment2/hygiene.php?operation=search&name=" + input, function(data) {
+                  $(".entryRow").remove();
+                  $(".pagin").remove();
+                  $(".movement").remove();
+                  $(".search").remove();
+                  $("#buttonArea").append('<button class="pagin" id="first" value="1" style="padding: 15px 100px">Back to Pages</button>');
+                  setFirst();
+                  $.each(data, function(i, item) {
+                    defaultOptions.push(item.name);
+                    $("table").append('<tr class="entryRow">' +
+                      '<td>' + item.name + '</td>' +
+                      '<td>' + item.addressLine + '</td>' +
+                      '<td>' + item.hygieneRating + '</td>' +
+                      '<td>' + item.ratingDate + '</td>' +
+                      '<td>' + '<button class="rating" value="' + item.name + '">Get Rating</button>' + '</td>' +
+                      '</tr>');
+                  });
+                  setRatingView();
+                });
+              });
+            }
+          });
+  </script>
+</head>
+
+<div class="mainDiv">
+  <a href="https://www.food.gov.uk/"><img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/cb/Food_Standards_Agency.svg/1200px-Food_Standards_Agency.svg.png" alt="Food Standards Agency Logo" style="width:100px;height:40px;"></a>
+  <a href="https://www.food.gov.uk/contact?navref=quicklink" style="text-decoration: none; color: #007c75; margin-left: 80px;"><b>Contact</b></a>
+  <a href="http://ratings.food.gov.uk/" style="text-decoration: none; color: #007c75; margin-left: 80px;"><b>Not in Medway? Click here for other ratings.</b></a>
+
+  <body>
+    <h1>Medway Restaurant Hygiene Ratings</h1>
+
+    <p>Hygiene within the restaurants in Medway is often hard to figure out at first glance without a little help. This table displays all hygiene records for Medway restaurants.</p>
+</div>
+
+<div id=buttonArea></div>
+
+<div class="mainDiv">
+  <table style="width:100%">
+    <tr>
+      <th>Company Name</th>
+      <th>Address</th>
+      <th>Hygiene Rating</th>
+      <th>Date Rated</th>
+      <th>Get Google Rating</th>
+    </tr>
+  </table>
+
+<div class="searchForm">
+  <input id="searchInputBox" type="text" class="searchBox" placeholder="Search Business...">
+  <button type="submit" class="searchButton">Search</button>
+</div>
+
+      <div class="results" id="autoRes">
+      </div>
+
+
+      <div class = "finePrint">
+        All Licences and Data collected by the Food Standards Agency.
+      </div>
+
+    </div>
+  </body>
+</html>
